@@ -41,8 +41,8 @@ Key Hook:
 Every interaction is part of a Grand Quest to restore the Library of Ages, which has been fragmented. Correct answers unlock ancient relics (progress markers) and reveal story fragments about lost civilizations, immersing students in a rich narrative.
 
 Progression System:
-Ancient Relic Tiers: Stardust Scroll (Novice), Moonstone Tablet, Sunfire Chalice, Crystal Prism, Eclipse Engine, Phoenix Feather, Dragon's Eye, Oracle's Mirror, Astral Crown, Celestial Glyph (Genius). Each has 5 Seals.
-Dynamic Skill Map: Subjects are Chambers. Restoring Chambers unlocks relics and lore.
+Knowledge Titles: Seeker, Learner, Scholar, Adept, Sage, Mentor, Master, Luminary, Virtuoso, Prodigy. Each has 5 Seals.
+Dynamic Skill Map: Subjects are Chambers. Restoring Chambers unlocks lore.
 
 Adaptive Learning Engine:
 Embed questions in micro-stories tailored to the child’s interests.

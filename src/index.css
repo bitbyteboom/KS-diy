@@ -51,7 +51,7 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-[color:#FFFDF5] text-foreground; /* faint near-white yellow background */
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   }
@@ -78,6 +78,17 @@
 
   .edu-input {
     @apply px-4 py-3 rounded-xl border border-gray-300 focus:border-edu-purple focus:ring-2 focus:ring-edu-purple/20 transition-all;
+  }
+
+  /* Add gentle pastel blue background for question and feedback areas */
+  .question-box,
+  .feedback-box {
+    background-color: #EAF4FF; /* soft pastel blue */
+  }
+
+  /* Slightly less bright yellow for input area */
+  .answer-input {
+    background-color: #FFFBEA; /* very light, soft yellow */
   }
 }
 

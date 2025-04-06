@@ -65,7 +65,7 @@ export default {
 				edu: {
 					purple: '#8B5CF6',
 					teal: '#0EA5E9',
-					yellow: '#FEF7CD',
+					yellow: '#FFFDF5',  // faint, near-white yellow for soothing background
 					green: '#F2FCE2'
 				}
 			},
