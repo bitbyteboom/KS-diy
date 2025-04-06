@@ -49,15 +49,10 @@ const ProfilePage = () => {
       setCharacterPreference(profile.characterPreference || '');
       setLearningStyle(profile.learningStyle || '');
     }
-    
     const savedApiKey = getApiKey();
-    if (savedApiKey) {
-      setApiKeyState(savedApiKey);
-    }
+    if (savedApiKey) setApiKeyState(savedApiKey);
     const savedBaseUrl = getApiBaseUrl();
-    if (savedBaseUrl) {
-      setApiBaseUrlState(savedBaseUrl);
-    }
+    if (savedBaseUrl) setApiBaseUrlState(savedBaseUrl);
   }, [profile]);
 
   const suggestGradeLevel = (ageValue: string) => {
@@ -75,8 +70,7 @@ const ProfilePage = () => {
   };
 
   const getOrdinalSuffix = (num: number) => {
-    const j = num % 10;
-    const k = num % 100;
+    const j = num % 10, k = num % 100;
     if (j === 1 && k !== 11) return 'st';
     if (j === 2 && k !== 12) return 'nd';
     if (j === 3 && k !== 13) return 'rd';
@@ -86,23 +80,19 @@ const ProfilePage = () => {
   const handleAgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newAge = e.target.value;
     setAge(newAge);
-    const suggestedGrade = suggestGradeLevel(newAge);
-    setGradeLevel(suggestedGrade);
+    const suggested = suggestGradeLevel(newAge);
+    setGradeLevel(suggested);
   };
 
   const handleSubjectToggle = (subject: string) => {
-    setPreferredSubjects(prev => 
-      prev.includes(subject) 
-        ? prev.filter(s => s !== subject) 
-        : [...prev, subject]
+    setPreferredSubjects(prev =>
+      prev.includes(subject) ? prev.filter(s => s !== subject) : [...prev, subject]
     );
   };
 
   const handleThemeToggle = (theme: string) => {
     setFavoriteThemes(prev =>
-      prev.includes(theme)
-        ? prev.filter(t => t !== theme)
-        : [...prev, theme]
+      prev.includes(theme) ? prev.filter(t => t !== theme) : [...prev, theme]
     );
   };
 

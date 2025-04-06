@@ -1,5 +1,10 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
+export interface SubjectLevel {
+  tier: number; // 1-10
+  seal: number; // 1-5
+}
+
 export interface Profile {
   name: string;
   gradeLevel: string;
@@ -9,6 +14,7 @@ export interface Profile {
   characterPreference?: string;
   learningStyle?: string;
   age?: string;
+  subjectLevels?: Record<string, SubjectLevel>;
 }
 
 interface ProfileContextType {
@@ -16,17 +22,6 @@ interface ProfileContextType {
   setProfile: (profile: Profile) => void;
   clearProfile: () => void;
 }
-
-const defaultProfile: Profile = {
-  name: '',
-  gradeLevel: '',
-  avatar: '1',
-  preferredSubjects: [],
-  favoriteThemes: [],
-  characterPreference: '',
-  learningStyle: '',
-  age: ''
-};
 
 const ProfileContext = createContext<ProfileContextType>({
   profile: null,

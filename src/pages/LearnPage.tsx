@@ -22,14 +22,25 @@ import {
 } from '@/services/aiService';
 import { toast } from "sonner";
 
+const relicTiers = [
+  "Stardust Scroll",
+  "Moonstone Tablet",
+  "Sunfire Chalice",
+  "Crystal Prism",
+  "Eclipse Engine",
+  "Phoenix Feather",
+  "Dragon's Eye",
+  "Oracle's Mirror",
+  "Astral Crown",
+  "Celestial Glyph"
+];
+
 const LearnPage = () => {
   const navigate = useNavigate();
-  const { profile } = useProfile();
+  const { profile, setProfile } = useProfile();
   
   useEffect(() => {
-    if (!profile) {
-      navigate('/profile');
-    }
+    if (!profile) navigate('/profile');
   }, [profile, navigate]);
   
   const [subject, setSubject] = useState<string>('All');
@@ -61,6 +72,31 @@ const LearnPage = () => {
   const getCurrentSubject = () => {
     if (subject !== 'All') return subject;
     return subjectQueue[subjectIndex % subjectQueue.length];
+  };
+  
+  const updateLevel = (subjectName: string, correct: boolean) => {
+    if (!profile) return;
+    const levels = { ...(profile.subjectLevels || {}) };
+    const current = levels[subjectName] || { tier: 1, seal: 1 };
+    if (correct) {
+      current.seal++;
+      if (current.seal > 5) {
+        current.seal = 1;
+        current.tier = Math.min(10, current.tier + 1);
+      }
+    } else {
+      current.seal--;
+      if (current.seal < 1) {
+        if (current.tier > 1) {
+          current.tier--;
+          current.seal = 5;
+        } else {
+          current.seal = 1;
+        }
+      }
+    }
+    levels[subjectName] = current;
+    setProfile({ ...profile, subjectLevels: levels });
   };
   
   const handleSendMessage = async () => {
@@ -121,6 +157,7 @@ const LearnPage = () => {
       );
       setFeedback(result.explanation);
       setIsAnswerCorrect(result.isCorrect);
+      updateLevel(getCurrentSubject(), result.isCorrect);
     } catch (error) {
       console.error('Error checking answer:', error);
     } finally {
@@ -140,19 +177,20 @@ const LearnPage = () => {
   };
   
   useEffect(() => {
-    if (profile) {
-      handleGenerateQuestion();
-    }
+    if (profile) handleGenerateQuestion();
   }, [subjectQueue, subjectIndex]); // eslint-disable-line react-hooks/exhaustive-deps
   
   if (!profile) return null;
+  
+  const currentLevel = profile.subjectLevels?.[getCurrentSubject()] || { tier:1, seal:1 };
+  const badge = `${relicTiers[currentLevel.tier -1]} - Seal ${currentLevel.seal}`;
   
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-grow py-6">
         <div className="edu-container">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-edu-purple to-edu-teal flex items-center justify-center text-white font-bold">
                 {profile.avatar}
@@ -160,6 +198,7 @@ const LearnPage = () => {
               <div>
                 <h2 className="font-semibold">{profile.name}</h2>
                 <p className="text-sm text-gray-500">{profile.gradeLevel}</p>
+                <p className="text-xs mt-1 font-semibold">{badge}</p>
               </div>
             </div>
             <Select value={subject} onValueChange={setSubject}>
@@ -174,172 +213,89 @@ const LearnPage = () => {
               </SelectContent>
             </Select>
           </div>
-          <Tabs defaultValue="quiz" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="quiz">Quest Mode</TabsTrigger>
-              <TabsTrigger value="chat">Ask Rune</TabsTrigger>
-            </TabsList>
-            <TabsContent value="quiz" className="border-none p-0">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
-                  <div className="bg-white rounded-xl shadow-md border p-6 mb-6">
-                    <div className="flex justify-between items-center mb-4">
-                      <h2 className="text-xl font-semibold">{getCurrentSubject()} Challenge</h2>
-                      <Button variant="outline" onClick={handleGenerateQuestion} disabled={isGeneratingQuestion}>
-                        New Question
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-xl shadow-md border p-6 mb-6">
+                <h3 className="text-lg font-semibold mb-4">
+                  {getCurrentSubject()} - {relicTiers[currentLevel.tier -1]} - Seal {currentLevel.seal}
+                </h3>
+                {currentQuestion ? (
+                  <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                    <p className="text-lg">{currentQuestion}</p>
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 rounded-lg p-4 mb-4 animate-pulse">
+                    <p className="text-gray-400">Generating question...</p>
+                  </div>
+                )}
+                <div className="space-y-4">
+                  <Textarea
+                    placeholder="Type your answer here..."
+                    value={userAnswer}
+                    onChange={(e) => setUserAnswer(e.target.value)}
+                    className="min-h-[100px]"
+                    disabled={isLoading || !currentQuestion}
+                  />
+                  <div className="flex justify-end gap-2">
+                    {isAnswerCorrect ? (
+                      <Button
+                        onClick={handleNextQuestion}
+                        className="bg-edu-teal hover:bg-edu-teal/90"
+                      >
+                        Next Question
                       </Button>
-                    </div>
-                    {currentQuestion ? (
-                      <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                        <p className="text-lg">{currentQuestion}</p>
-                      </div>
                     ) : (
-                      <div className="bg-gray-50 rounded-lg p-4 mb-4 animate-pulse">
-                        <p className="text-gray-400">Generating question...</p>
-                      </div>
-                    )}
-                    <div className="space-y-4">
-                      <Textarea
-                        placeholder="Type your answer here..."
-                        value={userAnswer}
-                        onChange={(e) => setUserAnswer(e.target.value)}
-                        className="min-h-[100px]"
-                        disabled={isLoading || !currentQuestion}
-                      />
-                      <div className="flex justify-end gap-2">
-                        {isAnswerCorrect ? (
-                          <Button
-                            onClick={handleNextQuestion}
-                            className="bg-edu-teal hover:bg-edu-teal/90"
-                          >
-                            Next Question
-                          </Button>
-                        ) : (
-                          <Button
-                            onClick={handleCheckAnswer}
-                            disabled={isLoading || !userAnswer.trim() || !currentQuestion}
-                            className="bg-edu-purple hover:bg-edu-purple/90"
-                          >
-                            Check Answer
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <div className="bg-white rounded-xl shadow-md border p-6 h-full">
-                    <h2 className="text-xl font-semibold mb-4">Rune's Feedback</h2>
-                    {feedback ? (
-                      <div>
-                        <div className={`p-4 rounded-lg mb-4 ${
-                          isAnswerCorrect 
-                            ? 'bg-edu-green/40 text-green-800' 
-                            : 'bg-orange-100 text-orange-800'
-                        }`}>
-                          <p className="font-semibold mb-1">
-                            {isAnswerCorrect ? 'Correct! 🎉' : 'Not quite right 🤔'}
-                          </p>
-                          <p className="text-sm">{feedback}</p>
-                        </div>
-                        {!isAnswerCorrect && (
-                          <p className="text-sm text-gray-600 mb-4">
-                            Try again or see the next question!
-                          </p>
-                        )}
-                        {isAnswerCorrect && (
-                          <Button
-                            onClick={handleNextQuestion}
-                            className="w-full bg-edu-teal hover:bg-edu-teal/90"
-                          >
-                            Next Question
-                          </Button>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center h-[200px] text-gray-400 text-center">
-                        <p>Submit your answer to see feedback</p>
-                      </div>
+                      <Button
+                        onClick={handleCheckAnswer}
+                        disabled={isLoading || !userAnswer.trim() || !currentQuestion}
+                        className="bg-edu-purple hover:bg-edu-purple/90"
+                      >
+                        Check Answer
+                      </Button>
                     )}
                   </div>
                 </div>
               </div>
-            </TabsContent>
-            <TabsContent value="chat" className="border-none p-0">
-              <div className="bg-white rounded-xl shadow-md border">
-                <div className="p-4 border-b">
-                  <h2 className="text-lg font-semibold">Ask Rune the Riddle Master</h2>
-                  <p className="text-sm text-gray-500">
-                    Get help with homework, explanations, or learning tips
-                  </p>
-                </div>
-                <div className="h-[400px] overflow-y-auto p-4 space-y-4">
-                  {chatMessages.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-gray-400 text-center">
-                      <p>No messages yet. Ask your first question!</p>
-                      <div className="mt-2 space-y-2">
-                        <p className="text-sm">Try questions like:</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => {
-                            setUserMessage(`Can you explain how to ${getCurrentSubject() === 'Math' ? 'solve equations' : 
-                              getCurrentSubject() === 'Science' ? 'understand photosynthesis' : 
-                              'write a good essay'} in a fun way?`);
-                          }}
-                        >
-                          How do I {getCurrentSubject() === 'Math' ? 'solve equations' : 
-                            getCurrentSubject() === 'Science' ? 'understand photosynthesis' : 
-                            'write a good essay'}?
-                        </Button>
-                      </div>
+            </div>
+            <div>
+              <div className="bg-white rounded-xl shadow-md border p-6 h-full">
+                <h2 className="text-xl font-semibold mb-4">Feedback</h2>
+                {feedback ? (
+                  <div>
+                    <div className={`p-4 rounded-lg mb-4 ${
+                      isAnswerCorrect 
+                        ? 'bg-edu-green/40 text-green-800' 
+                        : 'bg-orange-100 text-orange-800'
+                    }`}>
+                      <p className="font-semibold mb-1">
+                        {isAnswerCorrect ? 'Correct! 🎉' : 'Not quite right 🤔'}
+                      </p>
+                      <p className="text-sm">{feedback}</p>
                     </div>
-                  ) : (
-                    chatMessages.map((msg, idx) => (
-                      <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[80%] rounded-xl p-3 ${msg.role === 'user' ? 'bg-edu-purple text-white' : 'bg-gray-100'}`}>
-                          {msg.content}
-                        </div>
-                      </div>
-                    ))
-                  )}
-                  {isLoading && (
-                    <div className="flex justify-start">
-                      <div className="bg-gray-100 rounded-xl p-3">
-                        <div className="flex gap-2">
-                          <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"></div>
-                          <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                          <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div className="p-4 border-t">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Ask Rune anything..."
-                      value={userMessage}
-                      onChange={(e) => setUserMessage(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleSendMessage();
-                        }
-                      }}
-                    />
-                    <Button
-                      onClick={handleSendMessage}
-                      disabled={isLoading || !userMessage.trim()}
-                      className="bg-edu-teal hover:bg-edu-teal/90"
-                    >
-                      Send
-                    </Button>
+                    {!isAnswerCorrect && (
+                      <p className="text-sm text-gray-600 mb-4">
+                        Try again or see the next question!
+                      </p>
+                    )}
+                    {isAnswerCorrect && (
+                      <Button
+                        onClick={handleNextQuestion}
+                        className="w-full bg-edu-teal hover:bg-edu-teal/90"
+                      >
+                        Next Question
+                      </Button>
+                    )}
                   </div>
-                </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-[200px] text-gray-400 text-center">
+                    <p>Submit your answer to see feedback</p>
+                  </div>
+                )}
               </div>
-            </TabsContent>
-          </Tabs>
+            </div>
+          </div>
+
         </div>
       </main>
       <Footer />
