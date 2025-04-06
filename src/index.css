@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 255 255 255;
+    --foreground: 20 20 20;
+
+    --card: 255 255 255;
+    --card-foreground: 20 20 20;
+
+    --popover: 255 255 255;
+    --popover-foreground: 20 20 20;
+
+    --primary: 262 83 96;
+    --primary-foreground: 255 255 255;
+
+    --secondary: 199 89 92;
+    --secondary-foreground: 255 255 255;
+
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;
+
+    --accent: 240 5% 96%;
+    --accent-foreground: 240 6% 10%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 262 83% 60%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5% 26%;
+    --sidebar-primary: 240 6% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 5% 96%;
+    --sidebar-accent-foreground: 240 6% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217 91% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  .edu-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .edu-card {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-md overflow-hidden transition-all hover:shadow-lg;
+  }
+
+  .edu-button {
+    @apply px-6 py-3 rounded-full font-medium transition-all shadow-sm hover:shadow-md active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed;
+  }
+
+  .edu-button-primary {
+    @apply edu-button bg-edu-purple text-white hover:bg-opacity-90;
+  }
+
+  .edu-button-secondary {
+    @apply edu-button bg-edu-teal text-white hover:bg-opacity-90;
+  }
+
+  .edu-input {
+    @apply px-4 py-3 rounded-xl border border-gray-300 focus:border-edu-purple focus:ring-2 focus:ring-edu-purple/20 transition-all;
+  }
+}
+
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+.typing-effect {
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typing 2s steps(40, end);
+}
