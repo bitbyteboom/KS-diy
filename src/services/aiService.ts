@@ -1,30 +1,34 @@
 import { toast } from "sonner";
-import { useProfile } from "@/context/ProfileContext";
+
+let OPENAI_API_KEY: string | null = null;
+let OPENAI_API_BASE_URL: string | null = null;
+
+export const setApiConfig = (baseUrl: string, key: string) => {
+  OPENAI_API_BASE_URL = baseUrl;
+  OPENAI_API_KEY = key;
+  localStorage.setItem('openai_api_base_url', baseUrl);
+  localStorage.setItem('openai_api_key', key);
+  return true;
+};
+
+export const getApiKey = (): string | null => {
+  if (!OPENAI_API_KEY) {
+    OPENAI_API_KEY = localStorage.getItem('openai_api_key');
+  }
+  return OPENAI_API_KEY;
+};
+
+export const getApiBaseUrl = (): string => {
+  if (!OPENAI_API_BASE_URL) {
+    OPENAI_API_BASE_URL = localStorage.getItem('openai_api_base_url');
+  }
+  return OPENAI_API_BASE_URL || 'https://api.openai.com/v1';
+};
 
 export interface ChatMessage {
   role: 'system' | 'assistant' | 'user';
   content: string;
 }
-
-const getProfile = (): import('@/context/ProfileContext').Profile | null => {
-  try {
-    const saved = localStorage.getItem('kidscholar_profile');
-    if (!saved) return null;
-    return JSON.parse(saved);
-  } catch {
-    return null;
-  }
-};
-
-const getApiKey = (): string | null => {
-  const profile = getProfile();
-  return profile?.apiKey || null;
-};
-
-const getApiBaseUrl = (): string => {
-  const profile = getProfile();
-  return profile?.apiBaseUrl || 'https://api.openai.com/v1';
-};
 
 export const generateResponse = async (
   messages: ChatMessage[],
@@ -41,11 +45,11 @@ export const generateResponse = async (
   try {
     const contextMessage: ChatMessage = {
       role: 'system',
-      content: `You are KidScholar, an educational assistant for ${gradeLevel} students learning ${subject}. 
-      Communicate in a friendly, encouraging way appropriate for this age group.
-      Keep explanations simple and clear. Use examples and analogies where helpful.
-      Provide positive reinforcement for correct answers.
-      If the answer is wrong, explain why in a supportive way and guide toward the correct answer.`
+      content: `You are Rune the Riddle Master, a playful, encouraging AI tutor for ${gradeLevel} students learning ${subject}. 
+You embed questions in fun, story-driven adventures, using riddles, jokes, and playful banter.
+Correct answers unlock story progress; mistakes introduce twists, hints, and encouragement.
+Keep explanations simple, clear, and age-appropriate.
+Make learning feel like a magical quest, not a test.`
     };
 
     const allMessages = [contextMessage, ...messages];
@@ -81,7 +85,6 @@ export const generateResponse = async (
 export const generateQuestion = async (
   subject: string,
   gradeLevel: string,
-  difficulty: 'easy' | 'medium' | 'hard',
   previousQuestions: string[] = []
 ): Promise<{ question: string; correctAnswer: string }> => {
   const apiKey = getApiKey();
@@ -103,9 +106,11 @@ export const generateQuestion = async (
         messages: [
           {
             role: 'system',
-            content: `Generate a ${difficulty} ${subject} question appropriate for ${gradeLevel} students. 
-            Return the response in JSON format with 'question' and 'correctAnswer' fields.
-            Make sure the question is different from these previous questions: ${previousQuestions.join(', ')}`
+            content: `You are Rune the Riddle Master, a playful AI tutor for ${gradeLevel} students.
+Generate a fun, story-driven question in ${subject}, embedded in a micro-adventure or riddle.
+Make it engaging, age-appropriate, and adaptive.
+Return a JSON with 'question' and 'correctAnswer'.
+Avoid repeating these questions: ${previousQuestions.join(', ')}.`
           }
         ],
         temperature: 0.7,
@@ -162,10 +167,11 @@ export const checkAnswer = async (
         messages: [
           {
             role: 'system',
-            content: `You are evaluating a ${gradeLevel} student's answer to a ${subject} question. 
-            Check if their answer is correct, considering alternative phrasings or approaches.
-            Be encouraging and provide age-appropriate feedback.
-            Return the response in JSON format with 'isCorrect' (boolean), 'explanation' (string), and 'nextHint' (string, only if incorrect) fields.`
+            content: `You are Rune the Riddle Master, evaluating a ${gradeLevel} student's answer to a ${subject} question.
+Be playful and encouraging.
+If correct, celebrate and advance the story.
+If incorrect, provide a hint or twist in the story, and encourage retry.
+Return JSON with 'isCorrect' (boolean), 'explanation' (string), and optional 'nextHint'.`
           },
           {
             role: 'user',

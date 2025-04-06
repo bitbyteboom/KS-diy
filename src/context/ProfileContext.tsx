@@ -9,8 +9,6 @@ export interface Profile {
   characterPreference?: string;
   learningStyle?: string;
   age?: string;
-  apiKey?: string;
-  apiBaseUrl?: string;
 }
 
 interface ProfileContextType {
@@ -27,9 +25,7 @@ const defaultProfile: Profile = {
   favoriteThemes: [],
   characterPreference: '',
   learningStyle: '',
-  age: '',
-  apiKey: '',
-  apiBaseUrl: ''
+  age: ''
 };
 
 const ProfileContext = createContext<ProfileContextType>({
